@@ -35,6 +35,7 @@ class Connection(object):
         query = opts.copy()
         query['data'] = data
         res = self.session.post(url, json=query)
+        res.raise_for_status()
         out = res.json()
         if 'error' in out:
             raise RuntimeError('basilica.ai server returned error: `%s`' % out['error'])

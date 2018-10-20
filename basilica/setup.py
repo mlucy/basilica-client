@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='basilica',
-      version='0.2.1',
+      version='0.2.2',
       description='Client bindings for basilica.ai embeddings.',
       long_description='Client bindings for basilica.ai embeddings.',
       url='http://basilica.ai',

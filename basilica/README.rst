@@ -8,6 +8,8 @@ Supported Python versions: 2.7
 
 Releases
 ========
+- 0.2.2 : 10-15-2018
+  - Made us raise an error on failed post.
 - 0.2.1 : 10-15-2018
   - Bug fix.
 - 0.2.0 : 10-15-2018
