@@ -53,13 +53,15 @@ Get an API key
 ^^^^^^^^^^^^^^
 
 The example above uses the slow demo key.  You can get an API key of
-your own by signing up at https://basilica.ai/signup .  (If you
-already have an account, you can view your API keys at
-https://basilica.ai/api_keys .)
+your own by signing up at https://www.basilica.ai/accounts/register .
+(If you already have an account, you can view your API keys at
+https://www.basilica.ai/api-keys .)
 
 What next?
 ^^^^^^^^^^
 
 * Read the documentation for the python client: :ref:`basilica`
-* Check out some demos to get inspired: https://basilica.ai/demos
+* See an in-depth tutorial on training an image model: `How To Train
+  An Image Model With Basilica
+  <https://www.basilica.ai/tutorials/how-to-train-an-image-model/>`_
 
