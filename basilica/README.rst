@@ -8,6 +8,8 @@ Supported Python versions: 2.7
 
 Releases
 ========
+- 0.2.3 : 10-28-2018
+  - Implemented client retries.
 - 0.2.2 : 10-15-2018
   - Made us raise an error on failed post.
 - 0.2.1 : 10-15-2018
