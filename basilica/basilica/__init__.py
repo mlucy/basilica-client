@@ -121,7 +121,7 @@ class Connection(object):
         return self.embed(url, data, batch_size=batch_size, opts=opts, timeout=timeout)
 
     def embed_image(self, image, model='generic', version='default',
-                    opts={}, timeout=5):
+                    opts={}, timeout=10):
         """Generate the embedding for an image.  The image should be passed as a byte string.
 
         :param image: The image to embed.
