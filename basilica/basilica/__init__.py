@@ -5,13 +5,19 @@ import requests
 
 class Connection(object):
     def __init__(self, auth_key, server='https://api.basilica.ai',
-                 retries=2, backoff_factor=0.3, status_forcelist=(500)):
+                 retries=2, backoff_factor=0.1, status_forcelist=(500)):
         """A connection to basilica.ai that can be used to generate embeddings.
 
         :param auth_key: Your auth key.  You can view your auth keys at https://basilica.ai/auth_keys.
         :type auth_key: str
         :param server: What URL to use to connect to the server.
         :type server: str
+        :param retries: Number of times to retry failed connections and requests.
+        :type retries: int
+        :param backoff_factor: See urllib3.util.retry.Retry.backoff_factor .
+        :type backoff_factor: float
+        :status_forcelist: What HTTP response codes trigger a retry.
+        :type status_forcelist: Tuple[int]
 
         >>> with basilica.Connection('SLOW_DEMO_KEY') as c:
         ...   print(c.embed_sentence('A sentence.'))
