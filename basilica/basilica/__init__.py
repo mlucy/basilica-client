@@ -16,7 +16,7 @@ class Connection(object):
         :type retries: int
         :param backoff_factor: See urllib3.util.retry.Retry.backoff_factor .
         :type backoff_factor: float
-        :status_forcelist: What HTTP response codes trigger a retry.
+        :param status_forcelist: What HTTP response codes trigger a retry.
         :type status_forcelist: Tuple[int]
 
         >>> with basilica.Connection('SLOW_DEMO_KEY') as c:
