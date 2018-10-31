@@ -8,6 +8,8 @@ Supported Python versions: 2.7
 
 Releases
 ========
+- 0.2.4 : 10-28-2018
+  - Changed default batch size, added `six` dependency.
 - 0.2.3 : 10-28-2018
   - Implemented client retries.
 - 0.2.2 : 10-15-2018

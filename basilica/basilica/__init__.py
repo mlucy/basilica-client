@@ -88,8 +88,8 @@ class Connection(object):
             batch = []
 
     def embed_images(self, images, model='generic', version='default',
-                     batch_size=64, opts={}, timeout=30):
-        """Generate embeddings for images.  Images should be passed as byte strings, and will be sent to the server in batches to be embedded.
+                     batch_size=32, opts={}, timeout=30):
+        """Generate embeddings for JPEG images.  Images should be passed as byte strings, and will be sent to the server in batches to be embedded.
 
         :param images: An iterable (such as a list) of the images to embed.
         :type images: Iterable[str]
@@ -122,7 +122,7 @@ class Connection(object):
 
     def embed_image(self, image, model='generic', version='default',
                     opts={}, timeout=10):
-        """Generate the embedding for an image.  The image should be passed as a byte string.
+        """Generate the embedding for a JPEG image.  The image should be passed as a byte string.
 
         :param image: The image to embed.
         :type image: str
@@ -146,8 +146,8 @@ class Connection(object):
                                       opts=opts, timeout=timeout))[0]
 
     def embed_image_files(self, image_files, model='generic', version='default',
-                          batch_size=64, opts={}, timeout=30):
-        """Generate embeddings for image files.  The file names should be passed as paths that can be understood by `open`.
+                          batch_size=32, opts={}, timeout=30):
+        """Generate embeddings for JPEG image files.  The file names should be passed as paths that can be understood by `open`.
 
         :param image_files: An iterable (such as a list) of paths to the images to embed.
         :type image_files: Iterable[str]
@@ -179,7 +179,7 @@ class Connection(object):
 
     def embed_image_file(self, image_file, model='generic', version='default',
                          opts={}, timeout=10):
-        """Generate the embedding for an image file.  The file name should be passed as a path that can be understood by `open`.
+        """Generate the embedding for a JPEG image file.  The file name should be passed as a path that can be understood by `open`.
 
         :param image_file: Path to the image to embed.
         :type image_file: str
