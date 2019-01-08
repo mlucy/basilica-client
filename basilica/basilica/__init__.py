@@ -101,6 +101,14 @@ class Connection(object):
         :type batch_size: int
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
+        :param opts["dimensions"]: Number of dimensions to return.  PCA will be used to reduce the number of dimensions with minimal information loss.
+        :type opts["dimensions"]: int
+        :param opts["normalize_l2"]: Whether or not each instance should be scaled to have unit L2 norm.  (This is sometimes useful for instance retrieval tasks.)  Defaults to False.
+        :type opts["normalize_l2"]: bool
+        :param opts["normalize_mean"]: Whether or not to normalize each feature in the embedding to have mean 0 across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_mean"]: bool
+        :param opts["normalize_variance"]: Whether or not to normalize each feature in the embedding to have unit variance across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_variance"]: bool
         :param timeout: HTTP timeout for request.
         :type timeout: int
         :returns: A generator of embeddings.
@@ -132,6 +140,14 @@ class Connection(object):
         :type version: str
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
+        :param opts["dimensions"]: Number of dimensions to return.  PCA will be used to reduce the number of dimensions with minimal information loss.
+        :type opts["dimensions"]: int
+        :param opts["normalize_l2"]: Whether or not each instance should be scaled to have unit L2 norm.  (This is sometimes useful for instance retrieval tasks.)  Defaults to False.
+        :type opts["normalize_l2"]: bool
+        :param opts["normalize_mean"]: Whether or not to normalize each feature in the embedding to have mean 0 across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_mean"]: bool
+        :param opts["normalize_variance"]: Whether or not to normalize each feature in the embedding to have unit variance across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_variance"]: bool
         :param timeout: HTTP timeout for request.
         :type timeout: int
         :returns: An embedding.
@@ -159,6 +175,14 @@ class Connection(object):
         :type batch_size: int
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
+        :param opts["dimensions"]: Number of dimensions to return.  PCA will be used to reduce the number of dimensions with minimal information loss.
+        :type opts["dimensions"]: int
+        :param opts["normalize_l2"]: Whether or not each instance should be scaled to have unit L2 norm.  (This is sometimes useful for instance retrieval tasks.)  Defaults to False.
+        :type opts["normalize_l2"]: bool
+        :param opts["normalize_mean"]: Whether or not to normalize each feature in the embedding to have mean 0 across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_mean"]: bool
+        :param opts["normalize_variance"]: Whether or not to normalize each feature in the embedding to have unit variance across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_variance"]: bool
         :param timeout: HTTP timeout for request.
         :type timeout: int
         :returns: A generator of embeddings.
@@ -189,6 +213,15 @@ class Connection(object):
         :type version: str
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
+        :param opts["dimensions"]: Number of dimensions to return.  PCA will be used to reduce the number of dimensions with minimal information loss.
+        :type opts["dimensions"]: int
+        :param opts["normalize_l2"]: Whether or not each instance should be scaled to have unit L2 norm.  (This is sometimes useful for instance retrieval tasks.)  Defaults to False.
+        :type opts["normalize_l2"]: bool
+        :param opts["normalize_mean"]: Whether or not to normalize each feature in the embedding to have mean 0 across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_mean"]: bool
+        :param opts["normalize_variance"]: Whether or not to normalize each feature in the embedding to have unit variance across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_variance"]: bool
+
         :param timeout: HTTP timeout for request.
         :type timeout: int
         :returns: An embedding.
@@ -216,6 +249,14 @@ class Connection(object):
         :type batch_size: int
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
+        :param opts["dimensions"]: Number of dimensions to return.  PCA will be used to reduce the number of dimensions with minimal information loss.
+        :type opts["dimensions"]: int
+        :param opts["normalize_l2"]: Whether or not each instance should be scaled to have unit L2 norm.  (This is sometimes useful for instance retrieval tasks.)  Defaults to False.
+        :type opts["normalize_l2"]: bool
+        :param opts["normalize_mean"]: Whether or not to normalize each feature in the embedding to have mean 0 across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_mean"]: bool
+        :param opts["normalize_variance"]: Whether or not to normalize each feature in the embedding to have unit variance across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_variance"]: bool
         :param timeout: HTTP timeout for request.
         :type timeout: int
         :returns: A generator of embeddings.
@@ -243,6 +284,14 @@ class Connection(object):
         :type version: str
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
+        :param opts["dimensions"]: Number of dimensions to return.  PCA will be used to reduce the number of dimensions with minimal information loss.
+        :type opts["dimensions"]: int
+        :param opts["normalize_l2"]: Whether or not each instance should be scaled to have unit L2 norm.  (This is sometimes useful for instance retrieval tasks.)  Defaults to False.
+        :type opts["normalize_l2"]: bool
+        :param opts["normalize_mean"]: Whether or not to normalize each feature in the embedding to have mean 0 across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_mean"]: bool
+        :param opts["normalize_variance"]: Whether or not to normalize each feature in the embedding to have unit variance across our sample dataset.  Defaults to True when `dimensions` is set, or False otherwise.
+        :type opts["normalize_variance"]: bool
         :param timeout: HTTP timeout for request.
         :type timeout: int
         :returns: An embedding.
