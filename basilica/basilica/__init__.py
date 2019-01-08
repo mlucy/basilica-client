@@ -102,7 +102,7 @@ class Connection(object):
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
         :param timeout: HTTP timeout for request.
-        :type opts: int
+        :type timeout: int
         :returns: A generator of embeddings.
         :rtype: Generator[List[float]]
 
@@ -133,7 +133,7 @@ class Connection(object):
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
         :param timeout: HTTP timeout for request.
-        :type opts: int
+        :type timeout: int
         :returns: An embedding.
         :rtype: List[float]
 
@@ -160,7 +160,7 @@ class Connection(object):
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
         :param timeout: HTTP timeout for request.
-        :type opts: int
+        :type timeout: int
         :returns: A generator of embeddings.
         :rtype: Generator[List[float]]
 
@@ -190,7 +190,7 @@ class Connection(object):
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
         :param timeout: HTTP timeout for request.
-        :type opts: int
+        :type timeout: int
         :returns: An embedding.
         :rtype: List[float]
 
@@ -217,7 +217,7 @@ class Connection(object):
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
         :param timeout: HTTP timeout for request.
-        :type opts: int
+        :type timeout: int
         :returns: A generator of embeddings.
         :rtype: Generator[List[float]]
 
@@ -244,7 +244,7 @@ class Connection(object):
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
         :param timeout: HTTP timeout for request.
-        :type opts: int
+        :type timeout: int
         :returns: An embedding.
         :rtype: List[float]
 
