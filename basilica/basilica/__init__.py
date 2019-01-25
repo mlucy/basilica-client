@@ -97,7 +97,7 @@ class Connection(object):
         :type model: str
         :param version: What version of that model to use.
         :type version: str
-        :param batch_size: How many instances to send to the server in a batch.
+        :param batch_size: How many instances to send to the server at a time. If `batch_size` is lower than the number of instances, all instances will be sent.
         :type batch_size: int
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
@@ -171,7 +171,7 @@ class Connection(object):
         :type model: str
         :param version: What version of that model to use.
         :type version: str
-        :param batch_size: How many instances to send to the server in a batch.
+        :param batch_size: How many instances to send to the server at a time. If `batch_size` is lower than the number of instances, all instances will be sent.
         :type batch_size: int
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
@@ -245,7 +245,7 @@ class Connection(object):
         :type model: str
         :param version: What version of that model to use.
         :type version: str
-        :param batch_size: How many instances to send to the server in a batch.
+        :param batch_size: How many instances to send to the server at a time. If `batch_size` is lower than the number of instances, all instances will be sent.
         :type batch_size: int
         :param opts: Options specific to the model/version you chose.
         :type opts: Dict[str, Any]
