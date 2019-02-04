@@ -311,7 +311,7 @@ class Connection(object):
 
     def __resize_image(self, image):
         if type(image) != bytes:
-            raise ValueError('`image` argument must be bytes (got `%s`)' % (type(image)))
+            raise TypeError('`image` argument must be bytes (got `%s`)' % (type(image).__name__))
         im = Image.open(BytesIO(image))
         im.thumbnail((256, 256))
         im = im.convert("RGB")

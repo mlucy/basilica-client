@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: basilica
+Version: 0.2.4
+Summary: Client bindings for basilica.ai embeddings.
+Home-page: http://basilica.ai
+Author: Michael Lucy
+Author-email: mlucy@basilica.ai
+License: MIT
+Description: Client bindings for basilica.ai embeddings.
+Platform: UNKNOWN
