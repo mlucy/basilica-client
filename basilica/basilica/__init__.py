@@ -6,8 +6,6 @@ import requests
 from io import BytesIO
 from PIL import Image
 
-IMAGE_MAX_SIZE = 4194304
-
 class Connection(object):
     def __init__(self, auth_key, server='https://api.basilica.ai',
                  retries=2, backoff_factor=0.1, status_forcelist=(500)):
