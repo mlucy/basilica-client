@@ -312,6 +312,7 @@ class Connection(object):
     def __resize_image(self, image):
         im = Image.open(BytesIO(image))
         im.thumbnail((256, 256))
+        im = im.convert("RGB")
         imgByteArr = BytesIO()
         im.save(imgByteArr, "JPEG")
         return imgByteArr.getvalue()
