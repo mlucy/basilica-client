@@ -2,7 +2,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import base64
 import requests
-from io import BytesIO
+import io
 from PIL import Image
 
 class Connection(object):
@@ -312,10 +312,13 @@ class Connection(object):
     def __resize_image(self, image):
         if type(image) != bytes:
             raise TypeError('`image` argument must be bytes (got `%s`)' % (type(image).__name__))
-        im = Image.open(BytesIO(image))
+        try:
+            im = Image.open(io.BytesIO(image))
+        except OSError as e:
+            raise TypeError('`image` argument must be an image (`%s`)' % (str(e)))
         im.thumbnail((256, 256))
         im = im.convert("RGB")
-        imgByteArr = BytesIO()
+        imgByteArr = io.BytesIO()
         im.save(imgByteArr, "JPEG")
         return imgByteArr.getvalue()
 
