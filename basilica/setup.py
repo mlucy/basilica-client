@@ -12,5 +12,6 @@ setup(name='basilica',
       install_requires=[
           'requests',
           'six',
+          'Pillow',
       ],
       zip_safe=True)

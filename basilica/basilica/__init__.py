@@ -3,6 +3,8 @@ from requests.packages.urllib3.util.retry import Retry
 import base64
 import os
 import requests
+from io import BytesIO
+from PIL import Image
 
 IMAGE_MAX_SIZE = 4194304
 
@@ -130,8 +132,8 @@ class Connection(object):
         url = '%s/embed/images/%s/%s' % (self.server, model, version)
         data = ({'img': base64.b64encode(img).decode('utf-8')} for img in images)
         if (type(images) == list):
-            images_with_size = [ (i, len(x)) for i, x in enumerate(images) ]
-            self.__check_image_size(images_with_size)
+            images = map(self.__resize_image, images)
+            data = ({'img': base64.b64encode(img).decode('utf-8')} for img in images)
         return self.embed(url, data, batch_size=batch_size, opts=opts, timeout=timeout)
 
     def embed_image(self, image, model='generic', version='default',
@@ -201,11 +203,9 @@ class Connection(object):
         [-0.03025037609040737, ...]
         """
         def load_image_files(image_files):
-            image_file_names = [ (x, os.path.getsize(x)) for x in image_files ]
-            self.__check_image_size(image_file_names)
             for image_file in image_files:
                 with open(image_file, 'rb') as f:
-                    yield f.read()
+                    yield self.__resize_image(f.read())
         return self.embed_images(load_image_files(image_files), model=model, version=version,
                                  batch_size=batch_size, opts=opts, timeout=timeout)
 
@@ -312,7 +312,10 @@ class Connection(object):
         return list(self.embed_sentences([sentence], model=model, version=version,
                                          opts=opts, timeout=timeout))[0]
 
-    def __check_image_size(self, images):
-        oversized_images = list(filter(lambda x : x[1] > IMAGE_MAX_SIZE, images))
-        if len(oversized_images) > 0:
-          raise ValueError('All images must be under %s bytes (`%s`)' % (IMAGE_MAX_SIZE, oversized_images))
+    def __resize_image(self, image):
+        im = Image.open(BytesIO(image))
+        im.thumbnail((256, 256))
+        imgByteArr = BytesIO()
+        im.save(imgByteArr, "JPEG")
+        return imgByteArr.getvalue()
+
