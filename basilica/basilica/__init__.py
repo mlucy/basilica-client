@@ -127,10 +127,7 @@ class Connection(object):
         [-0.03025037609040737, ...]
         """
         url = '%s/embed/images/%s/%s' % (self.server, model, version)
-        data = ({'img': base64.b64encode(img).decode('utf-8')} for img in images)
-        if (type(images) == list):
-            images = map(self.__resize_image, images)
-            data = ({'img': base64.b64encode(img).decode('utf-8')} for img in images)
+        data = ({'img': self.__encode_image(img, transform_image=opts.get("transform_image", True) )} for img in images)
         return self.embed(url, data, batch_size=batch_size, opts=opts, timeout=timeout)
 
     def embed_image(self, image, model='generic', version='default',
@@ -202,7 +199,7 @@ class Connection(object):
         def load_image_files(image_files):
             for image_file in image_files:
                 with open(image_file, 'rb') as f:
-                    yield self.__resize_image(f.read())
+                    yield f.read()
         return self.embed_images(load_image_files(image_files), model=model, version=version,
                                  batch_size=batch_size, opts=opts, timeout=timeout)
 
@@ -309,16 +306,17 @@ class Connection(object):
         return list(self.embed_sentences([sentence], model=model, version=version,
                                          opts=opts, timeout=timeout))[0]
 
-    def __resize_image(self, image):
+    def __encode_image(self, image, transform_image):
         if type(image) != bytes:
             raise TypeError('`image` argument must be bytes (got `%s`)' % (type(image).__name__))
-        try:
-            im = Image.open(io.BytesIO(image))
-        except OSError as e:
-            raise TypeError('`image` argument must be an image (`%s`)' % (str(e)))
-        im.thumbnail((256, 256))
-        im = im.convert("RGB")
-        imgByteArr = io.BytesIO()
-        im.save(imgByteArr, "JPEG")
-        return imgByteArr.getvalue()
-
+        if transform_image:
+            try:
+                im = Image.open(io.BytesIO(image))
+            except OSError as e:
+                raise TypeError('`image` argument must be an image (`%s`)' % (str(e)))
+            im.thumbnail((512, 512))
+            im = im.convert("RGB")
+            img_bytes = io.BytesIO()
+            im.save(img_bytes, "JPEG")
+            image = img_bytes.getvalue()
+        return base64.b64encode(image).decode('utf-8')
