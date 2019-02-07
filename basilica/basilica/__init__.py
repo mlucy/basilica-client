@@ -5,6 +5,8 @@ import requests
 import io
 from PIL import Image
 
+__version__ = '0.2.5'
+
 class Connection(object):
     def __init__(self, auth_key, server='https://api.basilica.ai',
                  retries=2, backoff_factor=0.1, status_forcelist=(500)):
@@ -60,7 +62,8 @@ class Connection(object):
         # on its own.  We don't bother with backoff.
         for i in range(self.retry.read+1):
             try:
-                res = self.session.post(url, json=query, timeout=timeout)
+                headers = { 'User-Agent': 'Basilica Python Client (%s)' % __version__ }
+                res = self.session.post(url, json=query, timeout=timeout, headers=headers)
             except requests.exceptions.Timeout:
                 if i < self.retry.read:
                     continue
