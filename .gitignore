@@ -1,2 +1,4 @@
 basilica/docs/_build/
+basilica/basilica.egg-info/
+basilica/basilica/__pycache__/
 venv
