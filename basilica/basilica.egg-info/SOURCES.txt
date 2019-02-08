@@ -1,0 +1,9 @@
+README.rst
+setup.py
+basilica/__init__.py
+basilica.egg-info/PKG-INFO
+basilica.egg-info/SOURCES.txt
+basilica.egg-info/dependency_links.txt
+basilica.egg-info/requires.txt
+basilica.egg-info/top_level.txt
+basilica.egg-info/zip-safe

@@ -2,6 +2,10 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import base64
 import requests
+import io
+from PIL import Image
+
+__version__ = '0.2.5'
 
 class Connection(object):
     def __init__(self, auth_key, server='https://api.basilica.ai',
@@ -58,7 +62,8 @@ class Connection(object):
         # on its own.  We don't bother with backoff.
         for i in range(self.retry.read+1):
             try:
-                res = self.session.post(url, json=query, timeout=timeout)
+                headers = { 'User-Agent': 'Basilica Python Client (%s)' % __version__ }
+                res = self.session.post(url, json=query, timeout=timeout, headers=headers)
             except requests.exceptions.Timeout:
                 if i < self.retry.read:
                     continue
@@ -125,7 +130,7 @@ class Connection(object):
         [-0.03025037609040737, ...]
         """
         url = '%s/embed/images/%s/%s' % (self.server, model, version)
-        data = ({'img': base64.b64encode(img).decode('utf-8')} for img in images)
+        data = ({'img': self.__encode_image(img, transform_image=opts.get("transform_image", True) )} for img in images)
         return self.embed(url, data, batch_size=batch_size, opts=opts, timeout=timeout)
 
     def embed_image(self, image, model='generic', version='default',
@@ -303,3 +308,18 @@ class Connection(object):
         """
         return list(self.embed_sentences([sentence], model=model, version=version,
                                          opts=opts, timeout=timeout))[0]
+
+    def __encode_image(self, image, transform_image):
+        if type(image) != bytes:
+            raise TypeError('`image` argument must be bytes (got `%s`)' % (type(image).__name__))
+        if transform_image:
+            try:
+                im = Image.open(io.BytesIO(image))
+            except OSError as e:
+                raise TypeError('`image` argument must be an image (`%s`)' % (str(e)))
+            im.thumbnail((512, 512))
+            im = im.convert("RGB")
+            img_bytes = io.BytesIO()
+            im.save(img_bytes, "JPEG")
+            image = img_bytes.getvalue()
+        return base64.b64encode(image).decode('utf-8')

@@ -8,6 +8,8 @@ Supported Python versions: 2.7
 
 Releases
 ========
+- 0.2.5 : 02-07-2019
+  - Added image resizing.
 - 0.2.4 : 10-28-2018
   - Changed default batch size, added `six` dependency.
 - 0.2.3 : 10-28-2018
