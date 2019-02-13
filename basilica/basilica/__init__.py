@@ -247,6 +247,13 @@ class Connection(object):
         :param sentences: An iterable (such as a list) of sentences to embed.
         :type sentences: Iterable[str]
         :param model: What model to use (i.e. the kind of sentence being embedded).
+
+            * **generic:** Generic English text embedding (the default.)
+            * **reddit:** Text embedding specialized for English Reddit posts.
+            * **twitter:** Text embedding specialized for English tweets.
+            * **email:** Text embedding specialized for English emails.
+            * **product-reviews:** Text embedding specialized for English product reviews.
+
         :type model: str
         :param version: What version of that model to use.
         :type version: str
@@ -284,6 +291,13 @@ class Connection(object):
         :param sentence: The sentence to embed.
         :type sentence: str
         :param model: What model to use (i.e. the kind of sentence being embedded).
+
+            * **generic:** Generic English text embedding (the default.)
+            * **reddit:** Text embedding specialized for English Reddit posts.
+            * **twitter:** Text embedding specialized for English tweets.
+            * **email:** Text embedding specialized for English emails.
+            * **product-reviews:** Text embedding specialized for English product reviews.
+
         :type model: str
         :param version: What version of that model to use.
         :type version: str
