@@ -1,3 +1,3 @@
-mkdir -p _build _static _templates
-pip install ..
+mkdir -p _build
+pip install ../
 sphinx-build -b html . _build

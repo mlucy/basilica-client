@@ -38,7 +38,7 @@ Installation
 3. Sign up at http://basilica.ai/signup to get an API key.
 
 Connecting to Basilica
-===========
+======================
 You can connect to Basilica using your API key::
 
     import basilica
@@ -50,7 +50,7 @@ If you don't have an API key, you can visit http://basilica.ai/signup
 to get one.
 
 Embedding Images
-===========
+================
 
 You can embed a single image with `Connection.embed_image`, which
 takes bytes, or `Connection.embed_image_file`, which takes a path to a
@@ -69,7 +69,7 @@ batches requests to the server::
             ...
 
 Embedding Sentences
-===========
+===================
 
 You can embed a single sentence with `Connection.embed_sentence`,
 which takes a utf-8 string, or with `Connection.embed_sentences`,

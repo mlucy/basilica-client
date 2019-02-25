@@ -6,4 +6,3 @@ Table of Contents
 
    quickstart
    basilica
-
