@@ -329,6 +329,8 @@ class Connection(object):
         if transform_image:
             try:
                 im = Image.open(io.BytesIO(image))
+            except IOError as e:
+                raise TypeError('`image` argument must be an image (`%s`)' % (str(e)))
             except OSError as e:
                 raise TypeError('`image` argument must be an image (`%s`)' % (str(e)))
             im.thumbnail((512, 512))

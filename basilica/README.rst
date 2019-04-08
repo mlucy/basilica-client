@@ -8,6 +8,8 @@ Supported Python versions: 2.7
 
 Releases
 ========
+- 0.2.6 : 04-08-2019
+  - Fixed PIL error detection in Python 2.
 - 0.2.5 : 02-07-2019
   - Added image resizing.
 - 0.2.4 : 10-28-2018
