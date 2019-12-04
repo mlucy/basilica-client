@@ -4,6 +4,7 @@ import base64
 import requests
 import io
 from PIL import Image
+from multiplrocessing.dummy import Pool
 
 __version__ = '0.2.5'
 
@@ -41,6 +42,7 @@ class Connection(object):
         self.adapter = HTTPAdapter(max_retries=self.retry)
         self.session.mount('http://', self.adapter)
         self.session.mount('https://', self.adapter)
+        self.pool = Pool(10)
 
     def __enter__(self, *a, **kw):
         self.session.__enter__(*a, **kw)
@@ -80,17 +82,22 @@ class Connection(object):
 
     # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
+        future = []
         batch = []
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                for e in self.raw_embed(url, batch, opts=opts, timeout=timeout):
-                    yield e
+                arg = {'url' : url, 'batch': batch, 'opts' : opts, 'timeout' : timeout}
+                future.append(self.pool.apply_async(self.embed_batch, arg))
                 batch = []
         if len(batch) > 0:
-            for e in self.raw_embed(url, batch, opts=opts, timeout=timeout):
-                yield e
+            arg = {'url' : url, 'batch': batch, 'opts' : opts, 'timeout' : timeout}
+            future.append(self.pool.apply_async(self.embed_batch, arg))
             batch = []
+        
+    def embed_batch(self, arg):
+        for e in self.raw_embed(arg['url'], arg['batch'], opts=arg['opts'], timeout=arg['timeout']):
+            yield e
 
     def embed_images(self, images, model='generic', version='default',
                      batch_size=32, opts={}, timeout=30):
