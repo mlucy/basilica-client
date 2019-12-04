@@ -82,15 +82,18 @@ class Connection(object):
 
     # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
+        print("embed called")
         future = []
         batch = []
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
+                print('batch filled')
                 arg = {'url' : url, 'batch': batch, 'opts' : opts, 'timeout' : timeout}
                 future.append(self.pool.apply_async(self.embed_batch, arg))
                 batch = []
         if len(batch) > 0:
+            print('batch leftover')
             arg = {'url' : url, 'batch': batch, 'opts' : opts, 'timeout' : timeout}
             future.append(self.pool.apply_async(self.embed_batch, arg))
             batch = []
