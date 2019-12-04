@@ -82,6 +82,7 @@ class Connection(object):
 
     # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
+        print("parallelize testing")
         future = []
         batch = []
         for i in data:
