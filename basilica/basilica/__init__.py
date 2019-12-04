@@ -95,7 +95,7 @@ class Connection(object):
             arg = {'url' : url, 'batch': batch, 'opts' : opts, 'timeout' : timeout}
             future.append(self.pool.apply_async(self.raw_embed_wrapper, arg))
             batch = []
-        return future
+        return [e for e in future[0]]
         
     def raw_embed_wrapper(self, arg):
         print('raw_embed_wrapper called')
