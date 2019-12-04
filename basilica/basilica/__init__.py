@@ -4,7 +4,9 @@ import base64
 import requests
 import io
 from PIL import Image
-from multiprocessing.dummy import Pool
+import threading
+import time
+import Queue
 
 __version__ = '0.2.5'
 
@@ -42,6 +44,9 @@ class Connection(object):
         self.adapter = HTTPAdapter(max_retries=self.retry)
         self.session.mount('http://', self.adapter)
         self.session.mount('https://', self.adapter)
+        self.write_queue = Queue.Queue()
+        self.read_queue = Queue.Queue(maxsize=1)
+        self.global_time = time.time()
 
     def __enter__(self, *a, **kw):
         self.session.__enter__(*a, **kw)
@@ -81,31 +86,57 @@ class Connection(object):
 
     # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
-        future = []
-        pool = Pool(2)
         batch = []
+        outstanding = 0
+        th = None
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                arg = (self, url, batch, opts, timeout)
-                future.append(pool.apply_async(self.test, args=[1,2,3], callback=Connection.embed_callback))
+                print('batch filled')
+                self.write_queue.put_nowait(batch)
+                outstanding += 1
                 batch = []
+                if outstanding >= 1:
+                    if th and th.is_alive():
+                        emb = self.read_queue.get(block=True)
+                        outstanding -= 1
+                        for e in emb:
+                            yield e
+                    #
+                    th = threading.Thread(target=self.raw_embed_wrapper, args=(url, opts, timeout))
+                    th.start()
+                    try:
+                        emb = self.read_queue.get(block=False)
+                    # empty exception 
+                    except Exception as e:
+                        continue
+                    else:
+                        outstanding -= 1
+                        for e in emb:
+                            yield e
+        if th:
+            th.join()
+        while not self.read_queue.empty():
+            print('read_queue not empty')
+            try:
+                emb = self.read_queue.get_nowait()
+            except Exception as e:
+                break
+            else:
+                for e in emb:
+                    yield e
         if len(batch) > 0:
-            arg = (self, url, batch, opts, timeout)
-            future.append(pool.apply_async(self.test, args=[1,2,3], callback=Connection.embed_callback))
-            print('future appended')
+            # latency
+            for e in self.raw_embed(url, batch, opts, timeout):
+                yield e
             batch = []
-
-    @staticmethod
-    def test(a):
-        print('test called')
-        return a
-
-    @staticmethod
-    def embed_callback(emb):
-        print('callback called')
-        for e in emb:
-            yield e
+        
+    def raw_embed_wrapper(self, url, opts, timeout):
+        batch = self.write_queue.get(block=True)
+        #Exception
+        emb = self.raw_embed(url, batch, opts=opts, timeout=timeout)
+        self.read_queue.put(emb, block=True)
+        return None
 
     def embed_images(self, images, model='generic', version='default',
                      batch_size=32, opts={}, timeout=30):
