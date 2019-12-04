@@ -87,19 +87,19 @@ class Connection(object):
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                arg = {'url' : url, 'batch': batch, 'opts' : opts, 'timeout' : timeout}
-                future.append(self.pool.apply_async(self.raw_embed_wrapper, arg))
+                arg = [url, batch, opts, timeout]
+                future.append(self.pool.apply_async(self.raw_embed_wrapper, (self, arg)))
                 batch = []
 
         if len(batch) > 0:
-            arg = {'url' : url, 'batch': batch, 'opts' : opts, 'timeout' : timeout}
-            future.append(self.pool.apply_async(self.raw_embed_wrapper, arg))
+            arg = [url, batch, opts, timeout]
+            future.append(self.pool.apply_async(self.raw_embed_wrapper, (self, arg)))
             batch = []
         return [e.get() for e in future]
         
     def raw_embed_wrapper(self, arg):
         print('raw_embed_wrapper called')
-        return self.raw_embed(arg['url'], arg['batch'], opts=arg['opts'], timeout=arg['timeout'])
+        return self.raw_embed(arg[0], arg[1], opts=arg[2], timeout=arg[3])
 
     def embed_images(self, images, model='generic', version='default',
                      batch_size=32, opts={}, timeout=30):
