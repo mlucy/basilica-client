@@ -42,7 +42,7 @@ class Connection(object):
         self.adapter = HTTPAdapter(max_retries=self.retry)
         self.session.mount('http://', self.adapter)
         self.session.mount('https://', self.adapter)
-        self.pool = Pool(10)
+        self.pool = Pool(2)
 
     def __enter__(self, *a, **kw):
         self.session.__enter__(*a, **kw)
@@ -87,19 +87,18 @@ class Connection(object):
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                arg = [url, batch, opts, timeout]
-                future.append(self.pool.apply_async(self.raw_embed_wrapper, (self, arg)))
+                arg = [self, url, batch, opts, timeout]
+                future.append(self.pool.apply_async(self.raw_embed, args=arg, callback=Connection.embed_callback))
                 batch = []
-
         if len(batch) > 0:
-            arg = [url, batch, opts, timeout]
-            future.append(self.pool.apply_async(self.raw_embed_wrapper, (self, arg)))
+            arg = [self, url, batch, opts, timeout]
+            future.append(self.pool.apply_async(self.raw_embed, args=arg, callback=Connection.embed_callback))
             batch = []
-        return [e.get() for e in future]
-        
-    def raw_embed_wrapper(self, arg):
-        print('raw_embed_wrapper called')
-        return self.raw_embed(arg[0], arg[1], opts=arg[2], timeout=arg[3])
+    
+    @staticmethod
+    def embed_callback(emb):
+        for e in emb:
+            yield e
 
     def embed_images(self, images, model='generic', version='default',
                      batch_size=32, opts={}, timeout=30):
