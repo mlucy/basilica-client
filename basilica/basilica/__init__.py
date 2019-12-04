@@ -42,7 +42,6 @@ class Connection(object):
         self.adapter = HTTPAdapter(max_retries=self.retry)
         self.session.mount('http://', self.adapter)
         self.session.mount('https://', self.adapter)
-        self.pool = Pool(2)
 
     def __enter__(self, *a, **kw):
         self.session.__enter__(*a, **kw)
@@ -83,19 +82,23 @@ class Connection(object):
     # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
         future = []
+        pool = Pool(2)
         batch = []
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
                 arg = (self, url, batch, opts, timeout)
-                future.append(self.pool.apply_async(self.raw_embed, args=arg, callback=Connection.embed_callback))
+                future.append(pool.apply(self.test, args=arg, callback=Connection.embed_callback))
                 batch = []
         if len(batch) > 0:
             arg = (self, url, batch, opts, timeout)
-            future.append(self.pool.apply_async(self.raw_embed, args=arg, callback=Connection.embed_callback))
+            future.append(pool.apply(self.test, args=arg, callback=Connection.embed_callback))
             print('future appended')
             batch = []
     
+    def test(self, a):
+        return a
+
     @staticmethod
     def embed_callback(emb):
         print('callback called')
