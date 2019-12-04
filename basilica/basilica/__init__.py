@@ -87,16 +87,18 @@ class Connection(object):
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                arg = [self, url, batch, opts, timeout]
+                arg = (self, url, batch, opts, timeout)
                 future.append(self.pool.apply_async(self.raw_embed, args=arg, callback=Connection.embed_callback))
                 batch = []
         if len(batch) > 0:
-            arg = [self, url, batch, opts, timeout]
+            arg = (self, url, batch, opts, timeout)
             future.append(self.pool.apply_async(self.raw_embed, args=arg, callback=Connection.embed_callback))
+            print('future appended')
             batch = []
     
     @staticmethod
     def embed_callback(emb):
+        print('callback called')
         for e in emb:
             yield e
 
