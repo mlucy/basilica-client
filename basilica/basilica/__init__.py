@@ -88,15 +88,17 @@ class Connection(object):
             batch.append(i)
             if len(batch) >= batch_size:
                 arg = (self, url, batch, opts, timeout)
-                future.append(pool.apply_async(self.test, args=arg, callback=Connection.embed_callback))
+                future.append(pool.apply_async(self.test, args=[1,2,3], callback=Connection.embed_callback))
                 batch = []
         if len(batch) > 0:
             arg = (self, url, batch, opts, timeout)
-            future.append(pool.apply_async(self.test, args=arg, callback=Connection.embed_callback))
+            future.append(pool.apply_async(self.test, args=[1,2,3], callback=Connection.embed_callback))
             print('future appended')
             batch = []
-    
-    def test(self, a):
+
+    @staticmethod
+    def test(a):
+        print('test called')
         return a
 
     @staticmethod
