@@ -4,7 +4,7 @@ import base64
 import requests
 import io
 from PIL import Image
-from multiplrocessing.dummy import Pool
+from multiprocessing.dummy import Pool
 
 __version__ = '0.2.5'
 
@@ -82,7 +82,6 @@ class Connection(object):
 
     # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
-        print("parallelize testing")
         future = []
         batch = []
         for i in data:
