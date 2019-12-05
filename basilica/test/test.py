@@ -1,8 +1,11 @@
 import basilica
 import time
 import unittest
+from scipy import spatial
+from six.moves.queue import Queue
+import os
 
-test_key = 'ec6a2eec-94c7-4f9b-e656-c0d0824b60fe'
+test_key = os.environ.get('BASILICA_TEST_KEY', 'SLOW_DEMO_KEY')
 fake_key = 'FAKE_KEY'
 sentences_small = [
     "This is a sentence!",
@@ -27,7 +30,7 @@ def test_testkey_small():
     else:
         assert len(embeddings)==3
         assert all([len(e) == 512 for e in embeddings])
-        print("No exception raised, test passed")        
+        print("No exception raised, test passed")
     t1 = time.time() - begin
     print("time took : " + str(t1))
 
@@ -56,7 +59,7 @@ def test_demokey_small():
     else:
         assert len(embeddings)==3
         assert all([len(e) == 512 for e in embeddings])
-        print("No exception raised, test passed")        
+        print("No exception raised, test passed")
     t1 = time.time() - begin
     print("time took : " + str(t1))
 
@@ -71,7 +74,7 @@ def test_testkey_large():
     else:
         assert len(embeddings)==768
         assert all([len(e) == 512 for e in embeddings])
-        print("No exception raised, test passed")        
+        print("No exception raised, test passed")
     t1 = time.time() - begin
     print("time took : " + str(t1))
 
@@ -99,7 +102,7 @@ def test_timeout(timeout=0.01):
     except Exception as err:
         print("Exception raised:" + str(err))
     else:
-        print("No exception raised, test failed")        
+        print("No exception raised, test failed")
     t1 = time.time() - begin
     print("time took : " + str(t1))
 
@@ -113,10 +116,13 @@ def gen(s):
     for i in s:
         yield i
 
+def sufficiently_equal(v1, v2):
+    return spatial.distance.cosine(v1, v2) < 1e-9
+
 def test_sameconnection():
     print("\nTest concurrent embedding calls")
-    sentences_outer = ["This is a sentence!"] * 3
-    sentences_inner = ["This sentence not so same?"] * 3
+    sentences_outer = ["This is a sentence!"] * 39
+    sentences_inner = ["This sentence not so same?"] * 39
     sentences_truth = ["This is a sentence!", "This sentence not so same?"]
     # getting ground-truth
     with basilica.Connection(test_key) as c:
@@ -129,22 +135,9 @@ def test_sameconnection():
             emb_outer.append(x)
             for y in c.embed_sentences(gen(sentences_inner)):
                 emb_inner.append(y)
-    assert all([emb_outer[0] == e for e in emb_outer])
-    assert all([emb_inner[1] == e for e in emb_inner])
-    count_outer = 0
-    for i, j in zip(emb_outer[0], sentences_truth[0]):
-        if round(i-j, 6) != 0:
-            count_outer += 1
-    print('outer embedding diff: ' + str(count_outer))
-    count_inner = 0
-    for i, j in zip(emb_inner[1], sentences_truth[1]):
-        if round(i-j, 6) != 0:
-            count_inner += 1
-    print('inner embedding diff: ' + str(count_inner))
-    if count_inner == count_outer == 0:
-        print("Test Passed!")
-    else:
-        print("Test Failed")
+    assert all([sufficiently_equal(sentences_truth[0], e) for e in emb_outer])
+    assert all([sufficiently_equal(sentences_truth[1], e) for e in emb_inner])
+    print("Test Passed!")
 
 if __name__ == "__main__":
     test_testkey_small()
@@ -153,5 +146,5 @@ if __name__ == "__main__":
     test_testkey_large()
     test_fakekey_large()
     test_timeout()
-    #test_exception()
+    # test_exception()
     test_sameconnection()

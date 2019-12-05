@@ -5,9 +5,9 @@ import requests
 import io
 from PIL import Image
 import threading
-import Queue
+from six.moves.queue import Queue, Empty
 
-__version__ = '0.2.5'
+__version__ = '0.2.7'
 
 class Connection(object):
     def __init__(self, auth_key, server='https://api.basilica.ai',
@@ -43,7 +43,6 @@ class Connection(object):
         self.adapter = HTTPAdapter(max_retries=self.retry)
         self.session.mount('http://', self.adapter)
         self.session.mount('https://', self.adapter)
-        self.ongoing_embed = False
 
     def __enter__(self, *a, **kw):
         self.session.__enter__(*a, **kw)
@@ -82,8 +81,8 @@ class Connection(object):
         return out['embeddings']
 
     def embed(self, url, data, batch_size, opts, timeout):
-        batch_queue = Queue.Queue(maxsize=1)
-        emb_queue = Queue.Queue()
+        batch_queue = Queue(maxsize=1)
+        emb_queue = Queue()
         api_thread = threading.Thread(target=self.raw_embed_wrapper, args=(url, opts, timeout, batch_queue, emb_queue))
         api_thread.setDaemon(True)
         api_thread.start()
@@ -94,27 +93,24 @@ class Connection(object):
                 try:
                     emb = emb_queue.get(block=False)
                     if isinstance(emb, Exception):
-                        batch_queue.put("DONE", block=True)
+                        batch_queue.put('DONE', block=True)
                         raise emb
-                except Queue.Empty:
+                    else:
+                        for e in emb:
+                            yield e
+                except Empty:
                     pass
-                else:
-                    for e in emb:
-                        yield e
                 batch_queue.put(batch, block=True)
                 batch = []
         if len(batch) > 0:
             batch_queue.put(batch, block=True)
-        batch_queue.put("DONE", block=True)
+        batch_queue.put('DONE', block=True)
         while True:
-            try:
-                emb = emb_queue.get(block=True)
-                if isinstance(emb, Exception):
-                    raise emb
-                elif emb == "DONE":
-                    break
-            except Exception as err:
-                raise err
+            emb = emb_queue.get(block=True)
+            if isinstance(emb, Exception):
+                raise emb
+            elif emb == 'DONE':
+                break
             else:
                 for e in emb:
                     yield e
@@ -123,8 +119,8 @@ class Connection(object):
         while True:
             try:
                 batch = batch_queue.get(block=True)
-                if batch == "DONE":
-                    emb_queue.put("DONE")
+                if batch == 'DONE':
+                    emb_queue.put('DONE')
                     return None
                 emb = self.raw_embed(url, batch, opts=opts, timeout=timeout)
                 emb_queue.put(emb)
