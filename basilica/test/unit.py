@@ -60,8 +60,8 @@ class TestDriver(unittest.TestCase):
         def sufficiently_equal(v1, v2):
             return spatial.distance.cosine(v1, v2) < 1e-9
 
-        sentences_outer = ["This is a sentence!"] * 39
-        sentences_inner = ["This sentence not so same?"] * 39
+        sentences_outer = ["This is a sentence!"] * 10
+        sentences_inner = ["This sentence not so same?"] * 10
         sentences_truth = ["This is a sentence!", "This sentence not so same?"]
         # getting ground-truth
         with basilica.Connection(test_key) as c:
@@ -70,9 +70,9 @@ class TestDriver(unittest.TestCase):
         emb_outer = []
         emb_inner = []
         with basilica.Connection(test_key) as c:
-            for x in c.embed_sentences(gen(sentences_outer)):
+            for x in c.embed_sentences(gen(sentences_outer), batch_size=2):
                 emb_outer.append(x)
-                for y in c.embed_sentences(gen(sentences_inner)):
+                for y in c.embed_sentences(gen(sentences_inner), batch_size=2):
                     emb_inner.append(y)
         for e in emb_outer:
             self.assertTrue(sufficiently_equal(sentences_truth[0], e))
