@@ -4,10 +4,12 @@ Basilica
 
 Client bindings for basilica.ai.
 
-Supported Python versions: 2.7
+Supported Python versions: 2.7, 3.6
 
 Releases
 ========
+- 0.2.7 : 05-12-2019
+  - Parallelized requests to the server.
 - 0.2.6 : 04-08-2019
   - Fixed PIL error detection in Python 2.
 - 0.2.5 : 02-07-2019
