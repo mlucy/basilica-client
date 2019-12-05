@@ -6,6 +6,7 @@ import io
 from PIL import Image
 import threading
 import Queue
+import time
 
 __version__ = '0.2.5'
 
@@ -43,9 +44,7 @@ class Connection(object):
         self.adapter = HTTPAdapter(max_retries=self.retry)
         self.session.mount('http://', self.adapter)
         self.session.mount('https://', self.adapter)
-        self.write_queue = Queue.Queue()
-        self.read_queue = Queue.Queue()
-        self.thread_running = False
+        self.ongoing_embed = False
 
     def __enter__(self, *a, **kw):
         self.session.__enter__(*a, **kw)
@@ -83,63 +82,55 @@ class Connection(object):
             raise RuntimeError('basilica.ai server did not return embeddings: `%s`' % out)
         return out['embeddings']
 
-    # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
-        batch = []
-        outstanding = 0
-        api_thread = threading.Thread(target=self.raw_embed_wrapper, args=(url, opts, timeout))
+        batch_queue = Queue.Queue(maxsize=1)
+        emb_queue = Queue.Queue()
+        api_thread = threading.Thread(target=self.raw_embed_wrapper, args=(url, opts, timeout, batch_queue, emb_queue))
         api_thread.setDaemon(True)
         api_thread.start()
+        batch = []
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                self.write_queue.put_nowait(batch)
-                batch = []
-                if self.thread_running:
-                    emb = self.read_queue.get(block=True)
-                    if isinstance(emb, Exception):
-                        raise emb
-                    for e in emb:
-                        yield e
                 try:
-                    emb = self.read_queue.get(block=False) 
+                    emb = emb_queue.get(block=False)
+                    if isinstance(emb, Exception):
+                        batch_queue.put("DONE", block=True)
+                        raise emb
                 except Queue.Empty:
-                    continue
+                    pass
                 else:
                     for e in emb:
                         yield e
+                batch_queue.put(batch, block=True)
+                batch = []
         if len(batch) > 0:
-            self.write_queue.put_nowait(batch)
-        while not self.write_queue.empty() or self.thread_running:
+            batch_queue.put(batch, block=True)
+        batch_queue.put("DONE", block=True)
+        while True:
             try:
-                emb = self.read_queue.get(block=True)
+                emb = emb_queue.get(block=True)
                 if isinstance(emb, Exception):
                     raise emb
-            except Queue.Empty:
-                continue
-            except Exception as e:
-                raise e
+                elif emb == "DONE":
+                    break
+            except Exception as err:
+                raise err
             else:
                 for e in emb:
                     yield e
 
-    def raw_embed_wrapper(self, url, opts, timeout):
+    def raw_embed_wrapper(self, url, opts, timeout, batch_queue, emb_queue):
         while True:
             try:
-                batch = self.write_queue.get(block=False)
-                self.thread_running = True
+                batch = batch_queue.get(block=True)
+                if batch == "DONE":
+                    emb_queue.put("DONE")
+                    return None
                 emb = self.raw_embed(url, batch, opts=opts, timeout=timeout)
-                self.read_queue.put(emb, block=False)
-                self.thread_running = False if self.write_queue.empty() else True
-            except Queue.Empty:
-                continue
-            except Exception as e:
-                self.read_queue.put(e, block=True)
-                self.thread_running = False
-                break
-            if self.thread_running is False and self.write_queue.empty():
-                break
-        return None
+                emb_queue.put(emb)
+            except Exception as err:
+                emb_queue.put(err)
 
     def embed_images(self, images, model='generic', version='default',
                      batch_size=32, opts={}, timeout=30):
