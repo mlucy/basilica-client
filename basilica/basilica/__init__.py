@@ -14,7 +14,7 @@ class Connection(object):
                  retries=2, backoff_factor=0.1, status_forcelist=(500)):
         """A connection to basilica.ai that can be used to generate embeddings.
 
-        :param auth_key: Your auth key.  You can view your auth keys at https://basilica.ai/auth_keys.
+        :param auth_key: Your auth key.  You can view your auth keys at https://basilica.ai/api-keys/.
         :type auth_key: str
         :param server: What URL to use to connect to the server.
         :type server: str
