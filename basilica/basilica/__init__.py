@@ -5,7 +5,6 @@ import requests
 import io
 from PIL import Image
 import threading
-import time
 import Queue
 
 __version__ = '0.2.5'
@@ -45,8 +44,8 @@ class Connection(object):
         self.session.mount('http://', self.adapter)
         self.session.mount('https://', self.adapter)
         self.write_queue = Queue.Queue()
-        self.read_queue = Queue.Queue(maxsize=1)
-        self.global_time = time.time()
+        self.read_queue = Queue.Queue()
+        self.thread_running = False
 
     def __enter__(self, *a, **kw):
         self.session.__enter__(*a, **kw)
@@ -88,54 +87,58 @@ class Connection(object):
     def embed(self, url, data, batch_size, opts, timeout):
         batch = []
         outstanding = 0
-        th = None
+        api_thread = threading.Thread(target=self.raw_embed_wrapper, args=(url, opts, timeout))
+        api_thread.setDaemon(True)
+        api_thread.start()
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                print('batch filled')
                 self.write_queue.put_nowait(batch)
-                outstanding += 1
                 batch = []
-                if outstanding >= 1:
-                    if th and th.is_alive():
-                        emb = self.read_queue.get(block=True)
-                        outstanding -= 1
-                        for e in emb:
-                            yield e
-                    #
-                    th = threading.Thread(target=self.raw_embed_wrapper, args=(url, opts, timeout))
-                    th.start()
-                    try:
-                        emb = self.read_queue.get(block=False)
-                    # empty exception 
-                    except Exception as e:
-                        continue
-                    else:
-                        outstanding -= 1
-                        for e in emb:
-                            yield e
-        if th:
-            th.join()
-        while not self.read_queue.empty():
-            print('read_queue not empty')
+                if self.thread_running:
+                    emb = self.read_queue.get(block=True)
+                    if isinstance(emb, Exception):
+                        raise emb
+                    for e in emb:
+                        yield e
+                try:
+                    emb = self.read_queue.get(block=False) 
+                except Queue.Empty:
+                    continue
+                else:
+                    for e in emb:
+                        yield e
+        if len(batch) > 0:
+            self.write_queue.put_nowait(batch)
+        while not self.write_queue.empty() or self.thread_running:
             try:
-                emb = self.read_queue.get_nowait()
+                emb = self.read_queue.get(block=True)
+                if isinstance(emb, Exception):
+                    raise emb
+            except Queue.Empty:
+                continue
             except Exception as e:
-                break
+                raise e
             else:
                 for e in emb:
                     yield e
-        if len(batch) > 0:
-            # latency
-            for e in self.raw_embed(url, batch, opts, timeout):
-                yield e
-            batch = []
-        
+
     def raw_embed_wrapper(self, url, opts, timeout):
-        batch = self.write_queue.get(block=True)
-        #Exception
-        emb = self.raw_embed(url, batch, opts=opts, timeout=timeout)
-        self.read_queue.put(emb, block=True)
+        while True:
+            try:
+                batch = self.write_queue.get(block=False)
+                self.thread_running = True
+                emb = self.raw_embed(url, batch, opts=opts, timeout=timeout)
+                self.read_queue.put(emb, block=False)
+                self.thread_running = False if self.write_queue.empty() else True
+            except Queue.Empty:
+                continue
+            except Exception as e:
+                self.read_queue.put(e, block=True)
+                self.thread_running = False
+                break
+            if self.thread_running is False and self.write_queue.empty():
+                break
         return None
 
     def embed_images(self, images, model='generic', version='default',
