@@ -6,7 +6,6 @@ import io
 from PIL import Image
 import threading
 import Queue
-import time
 
 __version__ = '0.2.5'
 
