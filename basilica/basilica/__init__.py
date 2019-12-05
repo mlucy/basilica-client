@@ -4,15 +4,17 @@ import base64
 import requests
 import io
 from PIL import Image
+import threading
+from six.moves.queue import Queue, Empty
 
-__version__ = '0.2.5'
+__version__ = '0.2.7'
 
 class Connection(object):
     def __init__(self, auth_key, server='https://api.basilica.ai',
                  retries=2, backoff_factor=0.1, status_forcelist=(500)):
         """A connection to basilica.ai that can be used to generate embeddings.
 
-        :param auth_key: Your auth key.  You can view your auth keys at https://basilica.ai/auth_keys.
+        :param auth_key: Your auth key.  You can view your auth keys at https://basilica.ai/api-keys/.
         :type auth_key: str
         :param server: What URL to use to connect to the server.
         :type server: str
@@ -78,19 +80,52 @@ class Connection(object):
             raise RuntimeError('basilica.ai server did not return embeddings: `%s`' % out)
         return out['embeddings']
 
-    # TODO: parallelize
     def embed(self, url, data, batch_size, opts, timeout):
+        batch_queue = Queue(maxsize=1)
+        emb_queue = Queue()
+        api_thread = threading.Thread(target=self.raw_embed_wrapper, args=(url, opts, timeout, batch_queue, emb_queue))
+        api_thread.setDaemon(True)
+        api_thread.start()
         batch = []
         for i in data:
             batch.append(i)
             if len(batch) >= batch_size:
-                for e in self.raw_embed(url, batch, opts=opts, timeout=timeout):
-                    yield e
+                try:
+                    emb = emb_queue.get(block=False)
+                    if isinstance(emb, Exception):
+                        batch_queue.put('DONE', block=True)
+                        raise emb
+                    else:
+                        for e in emb:
+                            yield e
+                except Empty:
+                    pass
+                batch_queue.put(batch, block=True)
                 batch = []
         if len(batch) > 0:
-            for e in self.raw_embed(url, batch, opts=opts, timeout=timeout):
-                yield e
-            batch = []
+            batch_queue.put(batch, block=True)
+        batch_queue.put('DONE', block=True)
+        while True:
+            emb = emb_queue.get(block=True)
+            if isinstance(emb, Exception):
+                raise emb
+            elif emb == 'DONE':
+                break
+            else:
+                for e in emb:
+                    yield e
+
+    def raw_embed_wrapper(self, url, opts, timeout, batch_queue, emb_queue):
+        while True:
+            try:
+                batch = batch_queue.get(block=True)
+                if batch == 'DONE':
+                    emb_queue.put('DONE')
+                    return None
+                emb = self.raw_embed(url, batch, opts=opts, timeout=timeout)
+                emb_queue.put(emb)
+            except Exception as err:
+                emb_queue.put(err)
 
     def embed_images(self, images, model='generic', version='default',
                      batch_size=32, opts={}, timeout=30):
